@@ -15,7 +15,7 @@ namespace StudentDiary
             GetStudentData();
 
             tbFirstName.Select();
-            
+
         }
 
         private int _studentId;
@@ -28,11 +28,13 @@ namespace StudentDiary
 
         private void GetStudentData()
         {
+            _groups = _fileHelperGroups.DeserializeFromFile();
+
             if (_studentId != 0)
             {
                 Text = "Edycja danych ucznia";
                 var students = _fileHelperStudents.DeserializeFromFile();
-                _groups = _fileHelperGroups.DeserializeFromFile();
+
                 _student = students.FirstOrDefault(x => x.Id == _studentId);
 
                 if (_student == null)
@@ -40,10 +42,12 @@ namespace StudentDiary
 
                 FillTextBoxes();
 
-                
-                InitializeCmbGroups();
+
+
             }
-            
+
+            InitializeCmbGroups();
+
         }
 
         private void FillTextBoxes()
@@ -57,7 +61,7 @@ namespace StudentDiary
             tbPolishLang.Text = _student.PolishLang;
             tbForeignLang.Text = _student.ForeignLang;
             rtbComments.Text = _student.Comments;
-            chbHasOtherActiviities.Checked = _student.HasOtherActivities;        
+            chbHasOtherActiviities.Checked = _student.HasOtherActivities;
 
         }
 
@@ -69,7 +73,7 @@ namespace StudentDiary
                 students.RemoveAll(x => x.Id == _studentId);
             else
                 AssignIdToNewStudent(students);
-           
+
             AddNewStudentToList(students);
 
             _fileHelperStudents.SerializeToFile(students);
@@ -98,7 +102,7 @@ namespace StudentDiary
                 ForeignLang = tbForeignLang.Text,
                 Comments = rtbComments.Text,
                 HasOtherActivities = chbHasOtherActiviities.Checked,
-                GroupId = _groups != null ? _groups.Where(x => cmbGroup.SelectedItem.ToString() == x.Name).FirstOrDefault().Id : 0
+                GroupId = _groups != null && cmbGroup.SelectedIndex >= 0 ? _groups.Where(x => cmbGroup.SelectedItem.ToString() == x.Name).FirstOrDefault().Id : 0
             };
 
             students.Add(_student);
@@ -113,23 +117,22 @@ namespace StudentDiary
         private void cmbGroup_SelectedIndexChanged(object sender, EventArgs e)
         {
 
-            if (cmbGroupDictionary.TryGetValue(cmbGroup.SelectedIndex, out int groupId))
-                 _student.GroupId = groupId;
+            if (_student != null && cmbGroupDictionary.TryGetValue(cmbGroup.SelectedIndex, out int groupId))
+                _student.GroupId = groupId;
 
         }
 
         private void InitializeCmbGroups()
         {
             InitializeComboBoxGroupDictionary();
-            
+
             foreach (var group in _groups)
             {
                 cmbGroup.Items.Add(group.Name);
             }
-            cmbGroup.SelectedIndex = cmbGroupDictionary.Where(x => x.Value == _student.GroupId).Select(x => x.Key).FirstOrDefault();
 
-            if (cmbGroup.SelectedIndex < 0)
-                cmbGroup.SelectedIndex = 0;
+            cmbGroup.SelectedIndex = _student != null && _student.GroupId > 0 ? cmbGroupDictionary.Where(x => x.Value == _student.GroupId).Select(x => x.Key).FirstOrDefault() : -1;
+
         }
 
         private void InitializeComboBoxGroupDictionary()

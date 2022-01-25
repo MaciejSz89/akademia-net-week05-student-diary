@@ -155,11 +155,12 @@ namespace StudentDiary
 
         private void FillDataGridViewWithActualData()
         {
+           
             if (cmbGroup.SelectedIndex <= 0)
-                dgvDiary.DataSource = _students.OrderBy(s => s.Id).Join(_groups, s => s.GroupId, g => g.Id, (s, g) => new { s.Id, s.FirstName, s.LastName, s.Comments, s.Math, s.Technology, s.Physics, s.PolishLang, s.ForeignLang, s.HasOtherActivities, g.Name }).ToList();
+                dgvDiary.DataSource = _students.GroupJoin(_groups, s => s.GroupId, g => g.Id, (s, g) => new { s.Id, s.FirstName, s.LastName, s.Comments, s.Math, s.Technology, s.Physics, s.PolishLang, s.ForeignLang, s.HasOtherActivities, g.FirstOrDefault()?.Name }).OrderBy(s => s.Id).ToList();
             else
             {
-                var notFilteredData = _students.OrderBy(s => s.Id).Join(_groups, s => s.GroupId, g => g.Id, (s, g) => new { s.Id, s.FirstName, s.LastName, s.Comments, s.Math, s.Technology, s.Physics, s.PolishLang, s.ForeignLang, s.HasOtherActivities, s.GroupId, g.Name });
+                var notFilteredData = _students.Join(_groups, s => s.GroupId, g => g.Id, (s, g) => new { s.Id, s.FirstName, s.LastName, s.Comments, s.Math, s.Technology, s.Physics, s.PolishLang, s.ForeignLang, s.HasOtherActivities, s.GroupId, g.Name }).OrderBy(s => s.Id);
 
                 
 
